@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    body {
+      background-color: #2c1a0a; color: #4e342e;
+      font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+      padding: 15px; margin: 0;
+    }
+    /* Aged Parchment Styling */
+    .parchment {
+      background-color: #f5eadd;
+      background-image: 
+        radial-gradient(farthest-side at 50% 50%, rgba(0,0,0,0) 90%, rgba(0,0,0,0.1) 100%),
+        linear-gradient(to bottom, #f5eadd 0%, #e8d5c0 100%);
+      border-radius: 8px; padding: 25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      border: 2px solid #a1887f;
+      max-width: 450px; margin: 0 auto;
+      position: relative; overflow: hidden;
+    }
+    /* Darkening the edges for effect */
+    .parchment::before {
+      content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      box-shadow: inset 0 0 50px rgba(0,0,0,0.2); pointer-events: none;
+    }
+
+    h1 { color: #5d4037; margin-top: 0; font-size: 26px; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+    h2 { font-size: 18px; border-bottom: 2px solid #a1887f; padding-bottom: 5px; margin-top: 25px; color: #795548; text-transform: uppercase;}
+    .subtitle { text-align: center; font-style: italic; color: #795548; margin-top: -10px; margin-bottom: 20px; font-size: 14px;}
+    
+    /* Backstory Styling */
+    .backstory { font-size: 14px; line-height: 1.6; color: #5d4037; background: rgba(255,255,255,0.3); padding: 15px; border-radius: 4px;}
+
+    /* Stats Section with Progress Bars */
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px; }
+    .stat-item { background: rgba(161, 136, 127, 0.1); padding: 10px; border-radius: 4px; border: 1px solid rgba(161, 136, 127, 0.3); }
+    .stat-name { font-weight: bold; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; color: #795548;}
+    .stat-value { font-size: 24px; font-weight: bold; color: #5d4037; margin: 5px 0; }
+    .stat-bar-bg { height: 6px; background-color: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; background-color: #8d6e63; width: 0%; transition: width 0.5s ease-out; }
+
+    /* Interactive Skills Section */
+    .skills-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+    .skill-btn {
+      display: flex; align-items: center; gap: 15px;
+      background: rgba(255,255,255,0.4); border: 1px solid #a1887f;
+      padding: 12px; border-radius: 6px; cursor: pointer; text-align: left;
+      font-family: inherit; font-size: 16px; color: #4e342e;
+      transition: all 0.2s; -webkit-tap-highlight-color: transparent;
+    }
+    .skill-btn:active { background: rgba(161, 136, 127, 0.3); transform: translateY(1px); }
+    .skill-icon { font-size: 28px; width: 35px; text-align: center; }
+    .skill-text { font-weight: bold; flex-grow: 1; }
+    .skill-arrow { color: #a1887f; font-size: 12px; }
+
+    /* Modal (Popup) Styling for Skill Description */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center;
+      z-index: 1000; padding: 20px; box-sizing: border-box; backdrop-filter: blur(3px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-content {
+      background: #f5eadd; border-radius: 8px; padding: 20px;
+      border: 2px solid #a1887f; max-width: 350px; width: 100%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative;
+    }
+    .modal-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #a1887f; padding-bottom: 10px;}
+    .modal-title { font-weight: bold; font-size: 18px; color: #5d4037;}
+    .close-btn { 
+      position: absolute; top: 10px; right: 10px; background: none; border: none; 
+      font-size: 20px; color: #a1887f; cursor: pointer; 
+    }
+    .modal-body { font-size: 14px; line-height: 1.6; color: #4e342e;}
+  </style>
+</head>
+<body>
+  
+  <div class="parchment">
+    <h1 id="char-name">Forging Character...</h1>
+    <p id="char-subtitle" class="subtitle">...</p>
+    
+    <h2>Backstory</h2>
+    <div id="char-backstory" class="backstory">Waiting for Game Master input.</div>
+    
+    <h2>Attributes</h2>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-name">Strength</div>
+        <div id="stat-str-val" class="stat-value">--</div>
+        <div class="stat-bar-bg"><div id="stat-str-bar" class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-name">Intelligence</div>
+        <div id="stat-int-val" class="stat-value">--</div>
+        <div class="stat-bar-bg"><div id="stat-int-bar" class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-name">Wisdom</div>
+        <div id="stat-wis-val" class="stat-value">--</div>
+        <div class="stat-bar-bg"><div id="stat-wis-bar" class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-name">Dexterity</div>
+        <div id="stat-dex-val" class="stat-value">--</div>
+        <div class="stat-bar-bg"><div id="stat-dex-bar" class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-name">Constitution</div>
+        <div id="stat-con-val" class="stat-value">--</div>
+        <div class="stat-bar-bg"><div id="stat-con-bar" class="stat-bar-fill"></div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-name">Charisma</div>
+        <div id="stat-cha-val" class="stat-value">--</div>
+        <div class="stat-bar-bg"><div id="stat-cha-bar" class="stat-bar-fill"></div></div>
+      </div>
+    </div>
+    
+    <h2>Special Skills</h2>
+    <div id="skills-list" class="skills-list"></div>
+  </div>
+
+  <div id="modal" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="closeModal()">×</button>
+      <div class="modal-header">
+        <div id="modal-icon" class="skill-icon"></div>
+        <div id="modal-title" class="modal-title">Skill Name</div>
+      </div>
+      <div id="modal-body" class="modal-body">Description...</div>
+    </div>
+  </div>
+
+  <script>
+    // Stats list for easy looping
+    const statNames = ['strength', 'intelligence', 'wisdom', 'dexterity', 'constitution', 'charisma'];
+    const statAbbr = ['str', 'int', 'wis', 'dex', 'con', 'cha'];
+
+    // Interactive Modal Logic
+    function openModal(icon, name, description) {
+      document.getElementById('modal-icon').innerText = icon;
+      document.getElementById('modal-title').innerText = name;
+      document.getElementById('modal-body').innerText = description;
+      document.getElementById('modal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+    }
+
+    // Close modal if user presses 'Esc' key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Unpack AI data and draw the UI
+    const params = new URLSearchParams(window.location.search);
+    try {
+      if (params.has('data')) {
+        const parsed = JSON.parse(decodeURIComponent(params.get('data')));
+        
+        // Basic Info
+        if (parsed.name) document.getElementById('char-name').innerText = parsed.name;
+        if (parsed.race && parsed.class) {
+          document.getElementById('char-subtitle').innerText = `${parsed.race} ${parsed.class}`;
+        }
+        if (parsed.backstory) document.getElementById('char-backstory').innerText = parsed.backstory;
+
+        // Visual Stats (Bars fill dynamically)
+        if (parsed.stats) {
+          statNames.forEach((full, index) => {
+            const abbr = statAbbr[index];
+            const value = parsed.stats[full] || 0;
+            const percentage = (value / 20) * 100; // Assuming 1-20 scale
+            
+            // Set numeric value
+            document.getElementById(`stat-${abbr}-val`).innerText = value;
+            // Set visual bar width (triggers CSS animation)
+            setTimeout(() => {
+              document.getElementById(`stat-${abbr}-bar`).style.width = `${percentage}%`;
+            }, 300);
+          });
+        }
+
+        // Render Interactive Skills
+        const skillsContainer = document.getElementById('skills-list');
+        if (parsed.skills) {
+          parsed.skills.forEach((skill) => {
+            const btn = document.createElement('button');
+            btn.className = 'skill-btn';
+            
+            // Wire up the click to open our modal!
+            btn.onclick = () => openModal(skill.icon, skill.name, skill.description);
+            
+            btn.innerHTML = `
+              <div class="skill-icon">${skill.icon}</div>
+              <div class="skill-text">${skill.name}</div>
+              <div class="skill-arrow">▶</div>
+            `;
+            skillsContainer.appendChild(btn);
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Forge UI error:", e);
+      document.getElementById('char-name').innerText = "Forge Encountered an Error.";
+    }
+  </script>
+</body>
+</html>
